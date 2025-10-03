@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Mechanics Solver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" xintegrity="sha384-n8MVd4RsNIU07EWpWGbzqCqs/sz1BCjjx5StnNAxmMvLdtOQEuBNcJYERddbOSTy" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" xintegrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzYCACeUdcgtQLbbEuqQRJJaMs2iIp2UPOu" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" xintegrity="sha384-+VBxd3r6XgURPlLufgg4VKcIoc90lFkvsWJga3vrxyJPvGFT5A/sv5kS5UHRGgao" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .katex { font-size: 1.1em; }
+        .problem-section.hidden {
+            display: none;
+        }
+        .nav-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-button.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900">Interactive Mechanics Solver</h1>
+            <p class="text-lg text-gray-600 mt-2">Practice physics problems with dynamically generated values and step-by-step solutions.</p>
+        </header>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            <!-- Sidebar Navigation -->
+            <nav class="w-full md:w-1/4">
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <h2 class="text-xl font-bold mb-4 border-b pb-2">Problem Types</h2>
+                    <ul class="space-y-2">
+                        <li><button class="nav-button w-full text-left p-3 rounded-md font-medium bg-gray-200 hover:bg-indigo-500 hover:text-white" data-problem="kinematics">1D Kinematics</button></li>
+                        <li><button class="nav-button w-full text-left p-3 rounded-md font-medium bg-gray-200 hover:bg-indigo-500 hover:text-white" data-problem="friction">Forces & Friction</button></li>
+                        <li><button class="nav-button w-full text-left p-3 rounded-md font-medium bg-gray-200 hover:bg-indigo-500 hover:text-white" data-problem="pendulum">Circular Motion</button></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="w-full md:w-3/4">
+                <!-- 1D Kinematics Section -->
+                <div id="kinematics-problem" class="problem-section bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4">1D Kinematics: Polynomial Motion</h2>
+                    <p id="kinematics-problem-text" class="mb-4 text-gray-700 leading-relaxed"></p>
+                    <div class="flex items-center gap-4 mb-6">
+                        <button id="kinematics-generate-btn" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors">
+                            Generate New Problem
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label for="kinematics-t" class="block text-sm font-medium text-gray-700">Time (s)</label>
+                            <input type="number" id="kinematics-t" placeholder="t when v=0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label for="kinematics-x" class="block text-sm font-medium text-gray-700">Position (m)</label>
+                            <input type="number" id="kinematics-x" placeholder="Position at that time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label for="kinematics-a" class="block text-sm font-medium text-gray-700">Acceleration (m/s²)</label>
+                            <input type="number" id="kinematics-a" placeholder="Acceleration at that time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 mb-4">
+                        <button id="kinematics-check-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Check Answer</button>
+                        <button id="kinematics-solve-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Show Solution</button>
+                    </div>
+                    <p id="kinematics-feedback" class="h-6 text-lg font-medium"></p>
+                    <div id="kinematics-solution" class="mt-4 p-4 border-t border-gray-200 hidden"></div>
+                </div>
+
+                <!-- Forces & Friction Section -->
+                <div id="friction-problem" class="problem-section bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4">Forces & Friction on an Incline</h2>
+                    <p id="friction-problem-text" class="mb-4 text-gray-700 leading-relaxed"></p>
+                    <div class="my-4 p-4 bg-gray-50 rounded-lg border flex justify-center">
+                        <svg id="friction-svg" width="300" height="200" viewBox="0 0 350 250"></svg>
+                    </div>
+                    <button id="friction-generate-btn" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors mb-4">
+                        Generate New Problem
+                    </button>
+                    <div class="flex items-end gap-4 mb-4">
+                        <div>
+                            <label for="friction-p" class="block text-sm font-medium text-gray-700">Force P (N)</label>
+                            <input type="number" id="friction-p" placeholder="Required Force" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                         <button id="friction-check-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors h-10">Check</button>
+                        <button id="friction-solve-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors h-10">Solve</button>
+                    </div>
+                    <p id="friction-feedback" class="h-6 text-lg font-medium"></p>
+                    <div id="friction-solution" class="mt-4 p-4 border-t border-gray-200 hidden"></div>
+                </div>
+                
+                <!-- Circular Motion Section -->
+                <div id="pendulum-problem" class="problem-section bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4">Circular Motion: Pendulum</h2>
+                    <p id="pendulum-problem-text" class="mb-4 text-gray-700 leading-relaxed"></p>
+                     <div class="my-4 p-4 bg-gray-50 rounded-lg border flex justify-center">
+                        <svg id="pendulum-svg" width="250" height="250" viewBox="0 0 300 300"></svg>
+                    </div>
+                    <button id="pendulum-generate-btn" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors mb-4">
+                        Generate New Problem
+                    </button>
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="pendulum-v" class="block text-sm font-medium text-gray-700">Velocity (m/s)</label>
+                            <input type="number" id="pendulum-v" placeholder="Velocity of the bob" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label for="pendulum-a" class="block text-sm font-medium text-gray-700">Total Acceleration (m/s²)</label>
+                            <input type="number" id="pendulum-a" placeholder="Total acceleration of the bob" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 mb-4">
+                        <button id="pendulum-check-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Check Answer</button>
+                        <button id="pendulum-solve-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Show Solution</button>
+                    </div>
+                    <p id="pendulum-feedback" class="h-6 text-lg font-medium"></p>
+                    <div id="pendulum-solution" class="mt-4 p-4 border-t border-gray-200 hidden"></div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const problemSections = document.querySelectorAll('.problem-section');
+        const navButtons = document.querySelectorAll('.nav-button');
+        let solutions = {};
+
+        // --- Utility Functions ---
+        const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const randFloat = (min, max, decimals) => parseFloat((Math.random() * (max - min) + min).toFixed(decimals));
+        const g = 9.81;
+
+        const clearFeedbackAndSolution = (problemId) => {
+            document.getElementById(`${problemId}-feedback`).textContent = '';
+            const solutionDiv = document.getElementById(`${problemId}-solution`);
+            solutionDiv.innerHTML = '';
+            solutionDiv.classList.add('hidden');
+        };
+        
+        const renderLatex = () => {
+             if (window.renderMathInElement) {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
+        };
+
+        // --- Navigation ---
+        const showProblem = (problemId) => {
+            problemSections.forEach(section => {
+                section.classList.toggle('hidden', section.id !== `${problemId}-problem`);
+            });
+            navButtons.forEach(button => {
+                button.classList.toggle('active', button.dataset.problem === problemId);
+            });
+        };
+
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                showProblem(button.dataset.problem);
+            });
+        });
+
+        // --- Kinematics Problem Logic ---
+        const kinematics = {
+            generate: () => {
+                clearFeedbackAndSolution('kinematics');
+                document.getElementById('kinematics-t').value = '';
+                document.getElementById('kinematics-x').value = '';
+                document.getElementById('kinematics-a').value = '';
+
+                const a = randInt(2, 5) * (Math.random() < 0.5 ? 1 : -1);
+                const b = randInt(-15, -10);
+                const c = randInt(20, 30);
+                const d = randInt(5, 20);
+
+                const problemTextEl = document.getElementById('kinematics-problem-text');
+                problemTextEl.innerHTML = `The motion of a particle is defined by the relation $x(t) = ${a}t^3 + ${b}t^2 + ${c}t + ${d}$, where x and t are in meters and seconds. Determine the time, position, and acceleration of the particle when its velocity $v$ is zero. (If multiple positive times exist, use the smallest one).`;
+                
+                // Solve
+                const A = 3 * a;
+                const B = 2 * b;
+                const C = c;
+                const discriminant = B * B - 4 * A * C;
+
+                if (discriminant < 0) {
+                    kinematics.generate(); // Regenerate if no real solution
+                    return;
+                }
+                const t1 = (-B + Math.sqrt(discriminant)) / (2 * A);
+                const t2 = (-B - Math.sqrt(discriminant)) / (2 * A);
+                
+                const positiveTimes = [t1, t2].filter(t => t > 0);
+                if (positiveTimes.length === 0) {
+                    kinematics.generate(); // Regenerate if no positive time solution
+                    return;
+                }
+                const t = Math.min(...positiveTimes);
+
+                const x = a * t**3 + b * t**2 + c * t + d;
+                const acc = 6 * a * t + 2 * b;
+
+                solutions.kinematics = { t, x, a: acc };
+                renderLatex();
+            },
+            check: () => {
+                clearFeedbackAndSolution('kinematics');
+                const userT = parseFloat(document.getElementById('kinematics-t').value);
+                const userX = parseFloat(document.getElementById('kinematics-x').value);
+                const userA = parseFloat(document.getElementById('kinematics-a').value);
+                const sol = solutions.kinematics;
+
+                const tCorrect = Math.abs(userT - sol.t) < 0.1;
+                const xCorrect = Math.abs(userX - sol.x) < 0.1;
+                const aCorrect = Math.abs(userA - sol.a) < 0.1;
+
+                const feedback = document.getElementById('kinematics-feedback');
+                if (tCorrect && xCorrect && aCorrect) {
+                    feedback.textContent = 'Correct! Well done!';
+                    feedback.className = 'h-6 text-lg font-medium text-green-600';
+                } else {
+                    feedback.textContent = 'Not quite. Check your calculations or see the solution.';
+                    feedback.className = 'h-6 text-lg font-medium text-red-600';
+                }
+            },
+            solve: () => {
+                clearFeedbackAndSolution('kinematics');
+                const sol = solutions.kinematics;
+                const problemText = document.getElementById('kinematics-problem-text').innerHTML;
+                const solutionDiv = document.getElementById('kinematics-solution');
+                solutionDiv.classList.remove('hidden');
+
+                const [_, equation] = problemText.match(/\$x\(t\) = (.*?)\$/);
+
+                solutionDiv.innerHTML = `
+                    <h3 class="text-xl font-bold mb-2">Step-by-Step Solution</h3>
+                    <p class="mb-2"><strong>1. Find the velocity equation v(t).</strong></p>
+                    <p class="mb-4">Velocity is the derivative of position with respect to time, $v(t) = \\frac{dx}{dt}$.</p>
+                    <p class="mb-4">Given $x(t) = ${equation}$, we differentiate to get:</p>
+                    <p class="mb-4"> $v(t) = \\frac{d}{dt}(${equation}) = ${3*parseInt(equation.split('t')[0])}t^2 + ${2*parseInt(equation.split('t^2')[0].split('+ ')[1])}t + ${parseInt(equation.split('t +')[0].split('t^2 + ')[1].split('t')[1])}$</p>
+                    <p class="mb-2"><strong>2. Find the time t when velocity is zero.</strong></p>
+                    <p class="mb-4">Set $v(t) = 0$ and solve the quadratic equation for t.</p>
+                    <p class="mb-4">$0 = ${3*parseInt(equation.split('t')[0])}t^2 + ${2*parseInt(equation.split('t^2')[0].split('+ ')[1])}t + ${parseInt(equation.split('t +')[0].split('t^2 + ')[1].split('t')[1])}$. Using the quadratic formula, we find $t = ${sol.t.toFixed(3)} \\text{ s}$.</p>
+                    <p class="mb-2"><strong>3. Find the position x at that time.</strong></p>
+                    <p class="mb-4">Substitute $t = ${sol.t.toFixed(3)}$ into the position equation:</p>
+                    <p class="mb-4">$x(${sol.t.toFixed(3)}) = ${sol.x.toFixed(3)} \\text{ m}$.</p>
+                    <p class="mb-2"><strong>4. Find the acceleration a at that time.</strong></p>
+                    <p class="mb-4">First, find the acceleration equation $a(t) = \\frac{dv}{dt}$.</p>
+                    <p class="mb-4">$a(t) = \\frac{d}{dt}(v(t)) = ${6*parseInt(equation.split('t')[0])}t + ${2*parseInt(equation.split('t^2')[0].split('+ ')[1])}$.</p>
+                     <p class="mb-4">Now substitute $t = ${sol.t.toFixed(3)}$: $a(${sol.t.toFixed(3)}) = ${sol.a.toFixed(3)} \\text{ m/s}^2$.</p>
+                `;
+                renderLatex();
+            }
+        };
+
+        // --- Friction Problem Logic ---
+        const friction = {
+            generate: () => {
+                clearFeedbackAndSolution('friction');
+                document.getElementById('friction-p').value = '';
+                const m = randInt(10, 50);
+                const mu_k = randFloat(0.1, 0.4, 2);
+                const theta = randInt(10, 30);
+                const a = randFloat(1, 4, 1);
+
+                document.getElementById('friction-problem-text').textContent = `A block of mass ${m} kg rests on a plane inclined at an angle of ${theta}°. The coefficient of kinetic friction between the block and the plane is ${mu_k}. Calculate the magnitude of the force P, acting parallel to the incline, required to give the block an upward acceleration of ${a} m/s².`;
+                
+                const theta_rad = theta * Math.PI / 180;
+                const N = m * g * Math.cos(theta_rad);
+                const f_k = mu_k * N;
+                const P = m * a + m * g * Math.sin(theta_rad) + f_k;
+                
+                solutions.friction = { m, mu_k, theta, a, P, N, f_k };
+                friction.draw(theta);
+            },
+            check: () => {
+                clearFeedbackAndSolution('friction');
+                const userP = parseFloat(document.getElementById('friction-p').value);
+                const feedback = document.getElementById('friction-feedback');
+                if (Math.abs(userP - solutions.friction.P) < 1) {
+                    feedback.textContent = 'Correct! Excellent work!';
+                    feedback.className = 'h-6 text-lg font-medium text-green-600';
+                } else {
+                    feedback.textContent = 'Incorrect. Remember to include all forces acting along the incline.';
+                    feedback.className = 'h-6 text-lg font-medium text-red-600';
+                }
+            },
+            solve: () => {
+                 clearFeedbackAndSolution('friction');
+                 const sol = solutions.friction;
+                 const solutionDiv = document.getElementById('friction-solution');
+                 solutionDiv.classList.remove('hidden');
+                 solutionDiv.innerHTML = `
+                    <h3 class="text-xl font-bold mb-2">Step-by-Step Solution</h3>
+                    <p class="mb-2"><strong>1. Analyze forces perpendicular to the incline.</strong></p>
+                    <p class="mb-4">The block is not accelerating in this direction. The normal force $N$ must balance the perpendicular component of gravity.</p>
+                    <p class="mb-4">$\\sum F_y = N - mg \\cos(\\theta) = 0$</p>
+                    <p class="mb-4">$N = mg \\cos(${sol.theta}^\\circ) = ${sol.m} \\times ${g} \\times \\cos(${sol.theta}^\\circ) = ${sol.N.toFixed(2)} \\text{ N}$</p>
+                    <p class="mb-2"><strong>2. Calculate the kinetic friction force.</strong></p>
+                    <p class="mb-4">The friction force $f_k$ opposes the upward motion, so it acts down the incline.</p>
+                    <p class="mb-4">$f_k = \\mu_k N = ${sol.mu_k} \\times ${sol.N.toFixed(2)} = ${sol.f_k.toFixed(2)} \\text{ N}$</p>
+                     <p class="mb-2"><strong>3. Apply Newton's Second Law along the incline.</strong></p>
+                    <p class="mb-4">The net force along the incline equals mass times acceleration ($ma$). The applied force $P$ acts up the incline, while friction $f_k$ and the parallel component of gravity $mg \\sin(\\theta)$ act down the incline.</p>
+                    <p class="mb-4">$\\sum F_x = P - mg \\sin(\\theta) - f_k = ma$</p>
+                    <p class="mb-2"><strong>4. Solve for P.</strong></p>
+                    <p class="mb-4">$P = ma + mg \\sin(\\theta) + f_k$</p>
+                    <p class="mb-4">$P = (${sol.m} \\times ${sol.a}) + (${sol.m} \\times ${g} \\times \\sin(${sol.theta}^\\circ)) + ${sol.f_k.toFixed(2)}$</p>
+                    <p class="mb-4">$P = ${sol.m * sol.a.toFixed(2)} + ${(sol.m*g*Math.sin(sol.theta*Math.PI/180)).toFixed(2)} + ${sol.f_k.toFixed(2)} = ${sol.P.toFixed(2)} \\text{ N}$</p>
+                 `;
+                 renderLatex();
+            },
+            draw: (theta) => {
+                const svg = document.getElementById('friction-svg');
+                const angleRad = -theta * Math.PI / 180;
+                const cx = 175, cy = 150; // Center point for rotation
+                
+                svg.innerHTML = `
+                    <!-- Incline plane -->
+                    <path d="M50 200 L300 200 L50 ${200 - 250 * Math.tan(Math.abs(angleRad))}`" fill="lightgray" />
+                    <text x="60" y="${190 - 250 * Math.tan(Math.abs(angleRad)) / 2}" font-size="16" transform="rotate(${-theta} 60 ${190 - 250 * Math.tan(Math.abs(angleRad)) / 2})">${theta}°</text>
+                    
+                    <!-- Block and its center -->
+                    <g transform="translate(${cx}, ${cy}) rotate(${-theta}) translate(${-cx}, ${-cy})">
+                        <rect x="150" y="100" width="50" height="30" fill="royalblue" />
+                        <circle cx="175" cy="115" r="2" fill="black" />
+                        
+                        <!-- Forces -->
+                        <!-- P force -->
+                        <line x1="200" y1="115" x2="250" y2="115" stroke="red" stroke-width="2" marker-end="url(#arrow)" />
+                        <text x="255" y="118" fill="red" font-size="16">P</text>
+                        
+                        <!-- Friction force -->
+                        <line x1="150" y1="115" x2="110" y2="115" stroke="orange" stroke-width="2" marker-end="url(#arrow)" />
+                        <text x="90" y="118" fill="orange" font-size="16">fₖ</text>
+                    </g>
+                     <g transform="translate(${cx}, ${cy})">
+                        <!-- Normal force -->
+                        <line x1="0" y1="0" x2="${-60 * Math.sin(angleRad)}" y2="${-60 * Math.cos(angleRad)}" stroke="green" stroke-width="2" marker-end="url(#arrow)" />
+                        <text x="${-75 * Math.sin(angleRad)}" y="${-75 * Math.cos(angleRad)}" fill="green" font-size="16">N</text>
+                        
+                        <!-- Gravity -->
+                        <line x1="0" y1="0" x2="0" y2="70" stroke="purple" stroke-width="2" marker-end="url(#arrow)" />
+                        <text x="5" y="85" fill="purple" font-size="16">mg</text>
+                    </g>
+                    <defs>
+                        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+                        </marker>
+                    </defs>
+                `;
+            }
+        };
+        
+        // --- Pendulum Problem Logic ---
+        const pendulum = {
+            generate: () => {
+                clearFeedbackAndSolution('pendulum');
+                document.getElementById('pendulum-v').value = '';
+                document.getElementById('pendulum-a').value = '';
+
+                const m = randFloat(1, 5, 1);
+                const L = randFloat(1.5, 3.0, 1);
+                const theta = randInt(20, 45);
+                const T_ratio = randFloat(1.5, 2.5, 1);
+                const T = T_ratio * m * g;
+                
+                const problemTextEl = document.getElementById('pendulum-problem-text');
+                problemTextEl.innerHTML = `The bob of a ${L} m pendulum has a mass of ${m} kg. It describes an arc of a circle in a vertical plane. For the position shown (${theta}° from the vertical), the tension in the cord is ${T_ratio} times the weight of the bob. Find the velocity and the total acceleration of the bob in that position.`;
+                
+                // Solve
+                const theta_rad = theta * Math.PI / 180;
+                const v_squared = (T - m * g * Math.cos(theta_rad)) * L / m;
+                if (v_squared < 0) {
+                    pendulum.generate(); // Impossible scenario
+                    return;
+                }
+                const v = Math.sqrt(v_squared);
+                const a_n = v * v / L;
+                const a_t = g * Math.sin(theta_rad);
+                const a_total = Math.sqrt(a_n**2 + a_t**2);
+
+                solutions.pendulum = { L, m, theta, T, v, a_t, a_n, a_total };
+                pendulum.draw(theta);
+                renderLatex();
+            },
+            check: () => {
+                clearFeedbackAndSolution('pendulum');
+                const userV = parseFloat(document.getElementById('pendulum-v').value);
+                const userA = parseFloat(document.getElementById('pendulum-a').value);
+                const sol = solutions.pendulum;
+                
+                const vCorrect = Math.abs(userV - sol.v) < 0.1;
+                const aCorrect = Math.abs(userA - sol.a_total) < 0.1;
+
+                const feedback = document.getElementById('pendulum-feedback');
+                if (vCorrect && aCorrect) {
+                    feedback.textContent = 'Correct! Fantastic job!';
+                    feedback.className = 'h-6 text-lg font-medium text-green-600';
+                } else {
+                    feedback.textContent = 'Not quite. Check your tangential and normal components.';
+                    feedback.className = 'h-6 text-lg font-medium text-red-600';
+                }
+            },
+            solve: () => {
+                clearFeedbackAndSolution('pendulum');
+                const sol = solutions.pendulum;
+                const solutionDiv = document.getElementById('pendulum-solution');
+                solutionDiv.classList.remove('hidden');
+
+                solutionDiv.innerHTML = `
+                    <h3 class="text-xl font-bold mb-2">Step-by-Step Solution</h3>
+                    <p class="mb-2"><strong>1. Analyze forces in the normal direction (along the cord).</strong></p>
+                    <p class="mb-4">The net force in the normal direction provides the centripetal acceleration ($a_n = v^2/L$). Forces are the tension $T$ (positive, towards center) and the normal component of gravity $mg \\cos(\\theta)$ (negative, away from center).</p>
+                    <p class="mb-4">$\\sum F_n = T - mg \\cos(\\theta) = ma_n = m \\frac{v^2}{L}$</p>
+                    <p class="mb-2"><strong>2. Solve for velocity v.</strong></p>
+                    <p class="mb-4">We are given that $T = ${ (sol.T / (sol.m*g)).toFixed(2)} \\times mg = ${sol.T.toFixed(2)} \\text{ N}$. Rearrange the equation to solve for $v$.</p>
+                    <p class="mb-4">$v = \\sqrt{\\frac{L}{m}(T - mg \\cos(\\theta))}$</p>
+                    <p class="mb-4">$v = \\sqrt{\\frac{${sol.L}}{${sol.m}}(${sol.T.toFixed(2)} - ${sol.m} \\times ${g} \\times \\cos(${sol.theta}^\\circ))} = ${sol.v.toFixed(3)} \\text{ m/s}$</p>
+                    <p class="mb-2"><strong>3. Find the acceleration components.</strong></p>
+                    <p class="mb-4">The <strong>normal acceleration</strong> is $a_n = \\frac{v^2}{L} = \\frac{${sol.v.toFixed(3)}^2}{${sol.L}} = ${sol.a_n.toFixed(3)} \\text{ m/s}^2$.</p>
+                     <p class="mb-4">The <strong>tangential acceleration</strong> is caused by the tangential component of gravity: $a_t = g \\sin(\\theta) = ${g} \\times \\sin(${sol.theta}^\\circ) = ${sol.a_t.toFixed(3)} \\text{ m/s}^2$.</p>
+                    <p class="mb-2"><strong>4. Find the total acceleration.</strong></p>
+                    <p class="mb-4">The total acceleration is the vector sum of the normal and tangential components.</p>
+                    <p class="mb-4">$a = \\sqrt{a_n^2 + a_t^2} = \\sqrt{${sol.a_n.toFixed(3)}^2 + ${sol.a_t.toFixed(3)}^2} = ${sol.a_total.toFixed(3)} \\text{ m/s}^2$</p>
+                `;
+                renderLatex();
+            },
+            draw: (theta) => {
+                const svg = document.getElementById('pendulum-svg');
+                const L = 100; // svg length
+                const angleRad = theta * Math.PI / 180;
+                const cx = 150, cy = 50;
+                const bobX = cx + L * Math.sin(angleRad);
+                const bobY = cy + L * Math.cos(angleRad);
+
+                svg.innerHTML = `
+                    <!-- Pivot and Ceiling -->
+                    <line x1="100" y1="50" x2="200" y2="50" stroke="black" stroke-width="2" />
+                    <circle cx="${cx}" cy="${cy}" r="5" fill="black" />
+                    <!-- Vertical line -->
+                    <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy+L+20}" stroke="gray" stroke-width="1" stroke-dasharray="4" />
+                    
+                    <!-- Pendulum Cord -->
+                    <line x1="${cx}" y1="${cy}" x2="${bobX}" y2="${bobY}" stroke="black" stroke-width="2" />
+                    
+                    <!-- Pendulum Bob -->
+                    <circle cx="${bobX}" cy="${bobY}" r="15" fill="darkred" />
+
+                    <!-- Angle Arc and Text -->
+                    <path d="M ${cx} ${cy+30} A 30 30 0 0 1 ${cx + 30*Math.sin(angleRad)} ${cy + 30*Math.cos(angleRad)}" fill="none" stroke="blue" stroke-width="1" />
+                    <text x="${cx + 15}" y="${cy + 35}" fill="blue" font-size="16">${theta}°</text>
+                `;
+            }
+        };
+
+        // --- Event Listeners Setup ---
+        document.getElementById('kinematics-generate-btn').addEventListener('click', kinematics.generate);
+        document.getElementById('kinematics-check-btn').addEventListener('click', kinematics.check);
+        document.getElementById('kinematics-solve-btn').addEventListener('click', kinematics.solve);
+        
+        document.getElementById('friction-generate-btn').addEventListener('click', friction.generate);
+        document.getElementById('friction-check-btn').addEventListener('click', friction.check);
+        document.getElementById('friction-solve-btn').addEventListener('click', friction.solve);
+        
+        document.getElementById('pendulum-generate-btn').addEventListener('click', pendulum.generate);
+        document.getElementById('pendulum-check-btn').addEventListener('click', pendulum.check);
+        document.getElementById('pendulum-solve-btn').addEventListener('click', pendulum.solve);
+
+        // --- Initial Load ---
+        kinematics.generate();
+        friction.generate();
+        pendulum.generate();
+        showProblem('kinematics');
+    });
+    </script>
+</body>
+</html>
+
